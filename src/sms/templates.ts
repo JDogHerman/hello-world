@@ -28,12 +28,12 @@ export function offerText(c: CallInfo, code: string, sentAt: Date, expiresAt: Da
 export function confirmText(c: CallInfo, code: string): string {
   return (
     `${tag(c)} Confirmed (${code}): ${c.skill}, ${c.jobType} at ${c.venue}, ${day(c.startsAt, c.timezone)} ` +
-    `${time(c.startsAt, c.timezone)}–${time(c.endsAt, c.timezone)} (est). Contact your Steward if plans change.`
+    `${time(c.startsAt, c.timezone)}-${time(c.endsAt, c.timezone)} (est). Contact your Steward if plans change.`
   );
 }
 
 export function declineAckText(c: CallInfo, code: string): string {
-  return `${tag(c)} Got it — you declined offer ${code}. Thanks.`;
+  return `${tag(c)} Got it - you declined offer ${code}. Thanks.`;
 }
 
 export function filledText(c: CallInfo, code: string): string {

@@ -34,8 +34,8 @@ Sample logins from the seed script:
 
 | Role    | Email                    | Password       |
 |---------|--------------------------|----------------|
-| Admin   | `admin@local123.test`    | `admin12345`   |
-| Steward | `steward@local123.test`  | `steward12345` |
+| Admin   | `admin@iatse48.test`     | `admin12345`   |
+| Steward | `steward@iatse48.test`   | `steward12345` |
 
 The seed creates 24 workers across 4 tranches. A few are deliberately excluded (inactive, opted
 out, refusing a venue or job type, or unavailable), so every exclusion reason shows up. It also

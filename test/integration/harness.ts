@@ -54,7 +54,7 @@ export async function setupHarness(startIso = '2026-11-20T10:00:00-05:00'): Prom
     defaultRegion: 'US',
     log: { info: () => {}, warn: () => {}, error: (...a: unknown[]) => console.error(...a) },
   };
-  await db.updateTable('app_config').set({ timezone: 'America/New_York', local_name: 'Local 123' }).execute();
+  await db.updateTable('app_config').set({ timezone: 'America/New_York', local_name: 'IATSE 48 Akron/Canton' }).execute();
   const hash = await bcrypt.hash('password123', 4);
   const s = await db.insertInto('app_user').values({ email: 's@x.org', name: 'Sam Steward', role: 'steward', password_hash: hash, phone: '+12025550100' }).returning('id').executeTakeFirstOrThrow();
   const a = await db.insertInto('app_user').values({ email: 'a@x.org', name: 'Ada Admin', role: 'admin', password_hash: hash, phone: null }).returning('id').executeTakeFirstOrThrow();

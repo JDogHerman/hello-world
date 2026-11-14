@@ -31,15 +31,15 @@ if (Number(existing.n) > 0 && !reset) {
 if (reset) {
   await sql`TRUNCATE audit_log, alert, sms_message, booking, offer, candidate_exclusion, candidate_entry, candidate_list,
     position, job, worker_unavailability, worker_refusal, worker_skill, venue, job_type, skill, worker, app_user RESTART IDENTITY CASCADE`.execute(db);
-  await db.updateTable('app_config').set({ reply_window_minutes: 60, offers_per_open_slot: 1, quiet_hours_start: '21:00', quiet_hours_end: '08:00', local_name: 'Local 123', booking_buffer_minutes: 0 }).execute();
+  await db.updateTable('app_config').set({ reply_window_minutes: 60, offers_per_open_slot: 1, quiet_hours_start: '21:00', quiet_hours_end: '08:00', local_name: 'IATSE 48 Akron/Canton', booking_buffer_minutes: 0 }).execute();
 }
 
 const tz = 'America/New_York';
 await db.updateTable('app_config').set({ timezone: tz }).execute();
 
 const pw = (p: string) => bcrypt.hashSync(p, 10);
-const admin = await db.insertInto('app_user').values({ email: 'admin@local123.test', name: 'Alex Admin', role: 'admin', password_hash: pw('admin12345'), phone: null }).returning('id').executeTakeFirstOrThrow();
-const steward = await db.insertInto('app_user').values({ email: 'steward@local123.test', name: 'Sam Steward', role: 'steward', password_hash: pw('steward12345'), phone: '+12025550199' }).returning('id').executeTakeFirstOrThrow();
+const admin = await db.insertInto('app_user').values({ email: 'admin@iatse48.test', name: 'Alex Admin', role: 'admin', password_hash: pw('admin12345'), phone: null }).returning('id').executeTakeFirstOrThrow();
+const steward = await db.insertInto('app_user').values({ email: 'steward@iatse48.test', name: 'Sam Steward', role: 'steward', password_hash: pw('steward12345'), phone: '+13305550199' }).returning('id').executeTakeFirstOrThrow();
 
 const names = async (table: 'skill' | 'job_type', list: string[]) => {
   const out: Record<string, number> = {};
@@ -50,10 +50,10 @@ const skills = await names('skill', ['Rigging', 'Carpentry', 'Electrics', 'Audio
 const jobTypes = await names('job_type', ['Load-in', 'Load-out', 'Show Call', 'Rehearsal']);
 const venues: Record<string, number> = {};
 for (const [name, address] of [
-  ['Civic Arena', '100 Main St'],
-  ['Grand Theater', '25 Broadway'],
-  ['Riverside Convention Center', '1 Harbor Way'],
-  ['Lyric Playhouse', '410 Elm St'],
+  ['Akron Civic Theatre', 'Akron, OH'],
+  ['E.J. Thomas Performing Arts Hall', 'Akron, OH'],
+  ['Canton Palace Theatre', 'Canton, OH'],
+  ['Canton Memorial Civic Center', 'Canton, OH'],
 ]) venues[name] = (await db.insertInto('venue').values({ name, address }).returning('id').executeTakeFirstOrThrow()).id;
 
 type W = [first: string, last: string, tranche: number, start: string, skills: string[], refuse?: string[]];
@@ -61,7 +61,7 @@ const workers: W[] = [
   ['Maria', 'Alvarez', 1, '1998-03-02', ['Rigging', 'Fly Rail']],
   ['James', 'Okafor', 1, '2001-06-15', ['Rigging', 'Carpentry']],
   ['Linda', 'Chen', 1, '2001-06-15', ['Electrics', 'Spot Op']],
-  ['Robert', 'Byrne', 1, '2003-09-01', ['Rigging'], ['venue:Civic Arena']],
+  ['Robert', 'Byrne', 1, '2003-09-01', ['Rigging'], ['venue:Akron Civic Theatre']],
   ['Patricia', 'Novak', 1, '2005-01-10', ['Audio', 'Electrics']],
   ['Michael', 'Dubois', 1, '2006-04-22', ['Carpentry', 'Props']],
   ['Susan', 'Kowalski', 1, '2008-11-30', ['Wardrobe', 'Props']],
@@ -89,7 +89,7 @@ for (let i = 0; i < workers.length; i++) {
   const [first, last, tranche, start, sk, refuse = []] = workers[i];
   const w = await db
     .insertInto('worker')
-    .values({ first_name: first, last_name: last, phone: `+1202555${String(1100 + i)}`, tranche, start_date: start, notes: null, opt_out_at: null })
+    .values({ first_name: first, last_name: last, phone: `+1330555${String(100 + i).padStart(4, '0')}`, tranche, start_date: start, notes: null, opt_out_at: null })
     .returning('id')
     .executeTakeFirstOrThrow();
   ids.push(w.id);
@@ -131,7 +131,7 @@ const actor: Actor = { type: 'user', id: steward.id, label: 'Sam Steward', role:
 const jobId = await createJob(
   ctx,
   {
-    venue_id: venues['Civic Arena'],
+    venue_id: venues['Akron Civic Theatre'],
     job_type_id: jobTypes['Load-in'],
     date: jobDay,
     start_time: '08:00',
@@ -147,6 +147,6 @@ const jobId = await createJob(
 );
 
 console.log(`Seeded ${workers.length} workers, 8 skills, 4 job types, 4 venues and job #${jobId} (${jobDay}).`);
-console.log('Log in as  admin@local123.test / admin12345   or   steward@local123.test / steward12345');
+console.log('Log in as  admin@iatse48.test / admin12345   or   steward@iatse48.test / steward12345');
 void admin;
 await db.destroy();
