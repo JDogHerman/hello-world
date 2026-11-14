@@ -12,7 +12,7 @@ export function registerListRoutes(app: FastifyInstance, ctx: AppContext) {
 
     app.get(base, { preHandler: anyStaff }, async (_req, reply) => {
       const items = await listItems(ctx, kind);
-      return reply.page('lists', { title: label.plural, items, kind, label, base });
+      return reply.page('controlled', { title: label.plural, items, kind, label, base });
     });
 
     app.post(base, { preHandler: adminOnly }, async (req, reply) => {

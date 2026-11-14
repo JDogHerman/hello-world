@@ -1,0 +1,37 @@
+<%- include('../partials/head') %>
+<div class="pos-head">
+  <h1>Workers</h1>
+  <% if (user.role === 'admin') { %><a class="btn primary" href="/workers/new">New worker</a><% } %>
+</div>
+<div class="card">
+  <form method="get" class="row">
+    <label>Search name or phone <input type="search" name="q" value="<%= q %>"></label>
+    <label>Skill
+      <select name="skill"><option value="">Any</option>
+        <% for (const s of skills) { %><option value="<%= s.id %>" <%= String(s.id) === skill ? 'selected' : '' %>><%= s.name %></option><% } %>
+      </select></label>
+    <label>Show
+      <select name="status">
+        <% for (const [v, l] of [['active','Active'],['inactive','Inactive'],['opted_out','Opted out of SMS'],['all','All']]) { %>
+          <option value="<%= v %>" <%= v === status ? 'selected' : '' %>><%= l %></option><% } %>
+      </select></label>
+    <div class="shrink"><button>Filter</button></div>
+  </form>
+</div>
+<div class="card">
+  <p class="muted small"><%= workers.length %> worker(s), in seniority order (tranche, then start date).</p>
+  <div class="table-wrap"><table>
+    <tr><th>Name</th><th>Tranche</th><th class="hide-sm">Start date</th><th>Phone</th><th class="hide-sm">Skills</th><th>Status</th></tr>
+    <% for (const w of workers) { %>
+    <tr>
+      <td><a href="/workers/<%= w.id %>"><%= w.last_name %>, <%= w.first_name %></a></td>
+      <td><%= w.tranche %></td>
+      <td class="hide-sm"><%= w.start_date %></td>
+      <td class="mono"><%= h.phone(w.phone) %></td>
+      <td class="hide-sm small"><%= w.skills || '—' %></td>
+      <td><%- w.active ? '' : h.badge('cancelled').replace('cancelled','inactive') %> <%- w.sms_opt_out ? '<span class="badge bad">opted out</span>' : '' %></td>
+    </tr>
+    <% } %>
+  </table></div>
+</div>
+<%- include('../partials/foot') %>

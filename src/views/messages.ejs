@@ -1,0 +1,19 @@
+<%- include('partials/head') %>
+<h1>SMS messages</h1>
+<div class="card">
+  <div class="table-wrap"><table>
+    <tr><th>When</th><th>Dir</th><th>Worker</th><th>Message</th><th>Status</th></tr>
+    <% for (const m of messages) { %>
+    <tr>
+      <td class="small" style="white-space:nowrap"><%= h.dt(m.sent_at || m.created_at, tz, 'M/d h:mm:ss a') %></td>
+      <td><span class="badge <%= m.direction === 'inbound' ? 'info' : 'muted' %>"><%= m.direction === 'inbound' ? 'in' : 'out' %></span></td>
+      <td class="small"><% if (m.worker_id) { %><a href="/workers/<%= m.worker_id %>"><%= m.first_name %> <%= m.last_name %></a><% } else { %><span class="mono"><%= h.phone(m.phone) %></span><% } %></td>
+      <td class="small"><%= m.body %></td>
+      <td class="small"><%= m.status %><% if (m.error) { %><br><span style="color:var(--bad)"><%= m.error %></span><% } %></td>
+    </tr>
+    <% } %>
+  </table></div>
+  <% if (!messages.length) { %><p class="empty">No messages yet.</p><% } %>
+  <% if (nextBefore) { %><p><a class="btn" href="/messages?before=<%= nextBefore %>">Older →</a></p><% } %>
+</div>
+<%- include('partials/foot') %>

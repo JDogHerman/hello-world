@@ -13,7 +13,7 @@ const WorkerInput = z.object({
   phone: z.string().trim().min(1, 'Phone is required'),
   tranche: z.coerce.number().int().min(1, 'Tranche must be 1 or more').max(99),
   start_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Start date is required'),
-  active: z.preprocess((v) => v === true || v === 'on' || v === 'true', z.boolean()).default(true),
+  active: z.preprocess((v) => v === true || v === 'on' || v === 'true', z.boolean()),
   notes: z.string().max(2000).optional().nullable(),
   skill_ids: z.preprocess(
     (v) => (v === undefined || v === '' ? [] : Array.isArray(v) ? v : [v]),

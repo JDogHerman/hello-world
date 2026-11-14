@@ -11,7 +11,7 @@ const UserInput = z.object({
   role: z.enum(['admin', 'steward']),
   phone: z.string().trim().optional().default(''),
   password: z.string().optional().default(''),
-  active: z.preprocess((v) => v === true || v === 'on' || v === 'true', z.boolean()).default(true),
+  active: z.preprocess((v) => v === true || v === 'on' || v === 'true', z.boolean()),
 });
 
 export async function authenticate(ctx: AppContext, email: string, password: string): Promise<AppUser | null> {

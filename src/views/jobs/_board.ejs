@@ -1,0 +1,70 @@
+<% for (const p of positions) { const pct = Math.round(100 * p.filled_count / p.quantity); %>
+<div class="card">
+  <div class="pos-head">
+    <h2 style="margin:0"><%= p.skill %> <span class="muted">· <%= p.filled_count %>/<%= p.quantity %> filled</span></h2>
+    <div class="actions">
+      <%- h.badge(p.status) %> <%- p.list_status ? h.badge(p.list_status) : '' %>
+      <% if (p.list_id) { %><a class="btn small <%= ['draft','pending_approval'].includes(p.list_status) ? 'primary' : '' %>" href="/lists/<%= p.list_id %>">
+        <%= ['draft','pending_approval'].includes(p.list_status) ? 'Review & approve' : 'Candidate list' %> (<%= p.candidates %>)</a><% } %>
+    </div>
+  </div>
+  <div class="progress" style="margin:8px 0"><span style="width:<%= pct %>%"></span></div>
+  <% if (p.status === 'exhausted') { %>
+    <div class="flash err small">The candidate list ran out before this position was filled. Add workers to the list to resume.</div>
+  <% } %>
+
+  <% if (p.bookings.length) { %>
+  <h3>Confirmed</h3>
+  <% for (const b of p.bookings) { %>
+    <div class="row" style="align-items:center">
+      <div><a href="/workers/<%= b.worker_id %>"><%= b.first_name %> <%= b.last_name %></a> <span class="muted small mono"><%= h.phone(b.phone) %></span></div>
+      <% if (job.status === 'open') { %>
+      <form method="post" action="/bookings/<%= b.id %>/release" class="inline-form shrink" data-confirm="Release this worker? The slot reopens and the next candidate is texted.">
+        <input type="text" name="reason" placeholder="Reason" required>
+        <button class="small">Release</button>
+      </form>
+      <% } %>
+    </div>
+  <% } %>
+  <% } %>
+
+  <h3>Offers in flight</h3>
+  <% if (!p.inFlight.length) { %><p class="empty small">None.</p><% } else { %>
+  <div class="table-wrap"><table>
+    <tr><th>Worker</th><th>Code</th><th>Status</th><th>Time left</th></tr>
+    <% for (const o of p.inFlight) { %>
+    <tr>
+      <td><a href="/workers/<%= o.worker_id %>"><%= o.first_name %> <%= o.last_name %></a></td>
+      <td class="mono"><%= o.code %></td>
+      <td><%- h.badge(o.status) %><% if (o.status === 'queued') { %> <span class="small muted">held for quiet hours</span><% } %></td>
+      <td><% if (o.expires_at) { %><span class="countdown" data-expires="<%= h.iso(o.expires_at) %>"></span><br><span class="small muted">by <%= h.time(o.expires_at, tz) %></span><% } else { %>—<% } %></td>
+    </tr>
+    <% } %>
+  </table></div>
+  <% } %>
+
+  <% if (p.history.length) { %>
+  <details><summary>Offer history (<%= p.history.length %>)</summary>
+    <div class="table-wrap"><table>
+      <tr><th>Worker</th><th>Code</th><th>Result</th><th>When</th></tr>
+      <% for (const o of p.history) { %>
+      <tr><td><%= o.first_name %> <%= o.last_name %></td><td class="mono"><%= o.code %></td>
+        <td><%- h.badge(o.status) %> <span class="small muted"><%= o.cancel_reason ? o.cancel_reason.replace(/_/g,' ') : '' %></span></td>
+        <td class="small"><%= h.dt(o.responded_at || o.expires_at || o.sent_at || o.queued_at, tz) %></td></tr>
+      <% } %>
+    </table></div>
+  </details>
+  <% } %>
+
+  <% if (job.status === 'open' && p.status !== 'cancelled') { %>
+  <details><summary>Change quantity</summary>
+    <form method="post" action="/positions/<%= p.id %>/quantity" class="inline-form">
+      <input type="number" name="quantity" min="<%= Math.max(1, p.filled_count) %>" value="<%= p.quantity %>">
+      <input type="text" name="reason" placeholder="Reason" required>
+      <button class="small">Update</button>
+    </form>
+  </details>
+  <% } %>
+</div>
+<% } %>
+<% if (!positions.length) { %><div class="card empty">No positions.</div><% } %>

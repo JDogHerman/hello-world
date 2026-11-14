@@ -1,0 +1,32 @@
+<%- include('partials/head') %>
+<h1>Audit log</h1>
+<div class="card">
+  <form method="get" class="row">
+    <label>Action <select name="action"><option value="">Any</option>
+      <% for (const a of actions) { %><option <%= a === filters.action ? 'selected' : '' %>><%= a %></option><% } %></select></label>
+    <label>Entity <input type="text" name="entity" value="<%= filters.entity %>" placeholder="job, worker, offer…"></label>
+    <label>Entity id <input type="number" name="entity_id" value="<%= filters.entity_id %>"></label>
+    <label>Who <input type="text" name="actor" value="<%= filters.actor %>"></label>
+    <div class="shrink"><button>Filter</button> <a href="/audit" class="btn">Clear</a></div>
+  </form>
+</div>
+<div class="card">
+  <div class="table-wrap"><table>
+    <tr><th>When</th><th>Who</th><th>Action</th><th>Target</th><th>Details</th></tr>
+    <% for (const e of entries) { %>
+    <tr>
+      <td class="small" style="white-space:nowrap"><%= h.dt(e.at, tz, 'M/d/yy h:mm:ss a') %></td>
+      <td class="small"><span class="badge muted"><%= e.actor_type %></span> <%= e.actor_label %></td>
+      <td class="mono"><%= e.action %></td>
+      <td class="small"><a href="/audit?entity=<%= e.entity %>&entity_id=<%= e.entity_id %>"><%= e.entity %> #<%= e.entity_id %></a></td>
+      <td class="small"><% if (e.reason) { %><strong>Reason:</strong> <%= e.reason %><br><% } %>
+        <% if (e.data && Object.keys(e.data).length) { %><span class="mono muted" style="word-break:break-word"><%= h.json(e.data) %></span><% } %></td>
+    </tr>
+    <% } %>
+  </table></div>
+  <% if (!entries.length) { %><p class="empty">No matching entries.</p><% } %>
+  <% if (nextBefore) { const q = new URLSearchParams({ ...filters, before: nextBefore }); %>
+    <p><a class="btn" href="/audit?<%= q.toString() %>">Older →</a></p>
+  <% } %>
+</div>
+<%- include('partials/foot') %>

@@ -1,0 +1,27 @@
+<%- include('../partials/head') %>
+<div class="pos-head">
+  <h1>Jobs</h1>
+  <div class="actions">
+    <a class="btn <%= when !== 'past' ? 'primary' : '' %> small" href="/jobs">Upcoming</a>
+    <a class="btn <%= when === 'past' ? 'primary' : '' %> small" href="/jobs?when=past">Past</a>
+    <a class="btn primary" href="/jobs/new">New job</a>
+  </div>
+</div>
+<div class="card">
+  <% if (!jobs.length) { %><p class="empty">No jobs.</p><% } else { %>
+  <div class="table-wrap"><table>
+    <tr><th>When</th><th>Job</th><th>Filled</th><th>Status</th></tr>
+    <% for (const j of jobs) { %>
+    <tr>
+      <td><%= h.dt(j.starts_at, tz, 'ccc M/d/yy') %><br><span class="muted small"><%= h.time(j.starts_at, tz) %>–<%= h.time(j.est_end_at, tz) %></span></td>
+      <td><a href="/jobs/<%= j.id %>"><%= j.job_type %></a><br><span class="muted small"><%= j.venue %></span></td>
+      <td><%= j.filled %>/<%= j.needed %><div class="progress"><span style="width:<%= j.needed ? Math.round(100*j.filled/j.needed) : 0 %>%"></span></div></td>
+      <td><%- h.badge(j.status) %>
+        <% if (j.awaiting_approval) { %><span class="badge warn"><%= j.awaiting_approval %> to approve</span><% } %>
+        <% if (j.exhausted) { %><span class="badge bad"><%= j.exhausted %> exhausted</span><% } %></td>
+    </tr>
+    <% } %>
+  </table></div>
+  <% } %>
+</div>
+<%- include('../partials/foot') %>

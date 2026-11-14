@@ -121,8 +121,9 @@ export function registerWorkerRoutes(app: FastifyInstance, ctx: AppContext) {
   });
 
   app.post<{ Params: P }>('/workers/:id/refusals', { preHandler: anyStaff }, async (req, reply) => {
-    const b = req.body as { kind: string; target_id: string; reason?: string };
-    await W.addRefusal(ctx, Number(req.params.id), b, actorOf(req));
+    const b = req.body as { target?: string; reason?: string };
+    const [kind = '', target_id = ''] = (b.target ?? '').split(':');
+    await W.addRefusal(ctx, Number(req.params.id), { kind, target_id, reason: b.reason }, actorOf(req));
     return back(req, reply, `/workers/${req.params.id}`, { ok: 'Refusal added' });
   });
 
