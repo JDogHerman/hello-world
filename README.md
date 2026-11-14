@@ -19,6 +19,11 @@ docker compose up --build                          # Postgres + app on http://lo
 docker compose exec app node dist/db/seed.js       # sample data (first run only)
 ```
 
+The Compose file is set up for **local development** (`NODE_ENV=development`, a placeholder
+session secret). To deploy the same image, run it with `NODE_ENV=production`, a strong
+`SESSION_SECRET` and your real `DATABASE_URL`. In production the app refuses to start with the
+placeholder secret. It applies database migrations itself on startup.
+
 ## Quick start (local Node)
 
 ```bash

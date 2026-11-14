@@ -20,11 +20,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    # Local development defaults. For a real deployment set NODE_ENV=production and a
+    # strong SESSION_SECRET (the app refuses to start in production with the dev secret).
     environment:
+      NODE_ENV: ${NODE_ENV:-development}
       DATABASE_URL: postgres://postgres:postgres@db:5432/stagehand
       PORT: 3000
-      SESSION_SECRET: dev-only-secret-change-me-please-0123456789
-      PUBLIC_BASE_URL: http://localhost:3000
+      SESSION_SECRET: ${SESSION_SECRET:-dev-only-secret-change-me-please-0123456789}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:3000}
       SMS_PROVIDER: ${SMS_PROVIDER:-console}
       TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID:-}
       TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN:-}
@@ -32,7 +35,7 @@ services:
       TWILIO_MESSAGING_SERVICE_SID: ${TWILIO_MESSAGING_SERVICE_SID:-}
     ports:
       - "3000:3000"
-    command: sh -c "node dist/db/migrate.js && node dist/main.js"
+    # The app applies database migrations itself on startup.
 
 volumes:
   pgdata:
