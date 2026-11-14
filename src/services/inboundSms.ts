@@ -105,11 +105,11 @@ export async function handleInboundSms(ctx: AppContext, msg: InboundSms): Promis
     const openCodes = openOffers.map((o) => o.code);
 
     if (parsed.kind === 'help') {
-      await reply(T.helpText(config.local_name, openCodes));
+      await reply(T.helpText(config.sms_prefix, openCodes));
       return 'help';
     }
     if (parsed.kind === 'unknown') {
-      await reply(T.helpText(config.local_name, openCodes)); // offers stay open
+      await reply(T.helpText(config.sms_prefix, openCodes)); // offers stay open
       return 'unrecognized';
     }
 
@@ -127,16 +127,16 @@ export async function handleInboundSms(ctx: AppContext, msg: InboundSms): Promis
         .limit(1)
         .executeTakeFirst();
       if (!offer) {
-        await reply(T.unknownCodeText(config.local_name, parsed.code, openCodes));
+        await reply(T.unknownCodeText(config.sms_prefix, parsed.code, openCodes));
         return 'unknown_code';
       }
     } else if (openOffers.length === 1) {
       offer = openOffers[0];
     } else if (openOffers.length === 0) {
-      await reply(T.noOpenOffersText(config.local_name));
+      await reply(T.noOpenOffersText(config.sms_prefix));
       return 'no_open_offers';
     } else {
-      await reply(T.helpText(config.local_name, openCodes));
+      await reply(T.helpText(config.sms_prefix, openCodes));
       return 'ambiguous';
     }
 

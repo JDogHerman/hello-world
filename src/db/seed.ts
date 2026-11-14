@@ -31,7 +31,7 @@ if (Number(existing.n) > 0 && !reset) {
 if (reset) {
   await sql`TRUNCATE audit_log, alert, sms_message, booking, offer, candidate_exclusion, candidate_entry, candidate_list,
     position, job, worker_unavailability, worker_refusal, worker_skill, venue, job_type, skill, worker, app_user RESTART IDENTITY CASCADE`.execute(db);
-  await db.updateTable('app_config').set({ reply_window_minutes: 60, offers_per_open_slot: 1, quiet_hours_start: '21:00', quiet_hours_end: '08:00', local_name: 'IATSE 48 Akron/Canton', booking_buffer_minutes: 0 }).execute();
+  await db.updateTable('app_config').set({ reply_window_minutes: 60, offers_per_open_slot: 1, quiet_hours_start: '21:00', quiet_hours_end: '08:00', local_name: 'IATSE 48 Akron/Canton', sms_prefix: 'IA48', booking_buffer_minutes: 0 }).execute();
 }
 
 const tz = 'America/New_York';

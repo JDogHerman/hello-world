@@ -334,7 +334,7 @@ async function raiseExhaustedAlert(s: Scope, position: Position): Promise<void> 
       await enqueueSms(tx, {
         workerId: null,
         phone: st.phone!,
-        body: T.exhaustedStewardText(config.local_name, info, position.filled_count, position.quantity),
+        body: T.exhaustedStewardText(config.sms_prefix, info, position.filled_count, position.quantity),
       });
     }
   }

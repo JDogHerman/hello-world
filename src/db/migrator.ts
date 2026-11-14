@@ -2,12 +2,14 @@ import { Migrator, type Migration, type MigrationProvider } from 'kysely/migrati
 import type { DB } from './kysely.js';
 import * as m001 from './migrations/001_initial.js';
 import * as m002 from './migrations/002_iatse48_default.js';
+import * as m003 from './migrations/003_sms_prefix.js';
 
 // Migrations are registered explicitly (rather than read from disk) so the same
 // code works from `src` under tsx and from `dist` after compilation.
 const migrations: Record<string, Migration> = {
   '001_initial': m001,
   '002_iatse48_default': m002,
+  '003_sms_prefix': m003,
 };
 
 class StaticProvider implements MigrationProvider {

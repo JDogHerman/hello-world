@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
 
 export interface CallInfo {
-  localName: string;
+  smsPrefix: string;
   jobType: string;
   venue: string;
   skill: string;
@@ -12,7 +12,7 @@ export interface CallInfo {
 
 const day = (at: Date, tz: string) => DateTime.fromJSDate(at, { zone: tz }).toFormat('ccc M/d');
 const time = (at: Date, tz: string) => DateTime.fromJSDate(at, { zone: tz }).toFormat('h:mm a');
-const tag = (c: { localName: string }) => `[${c.localName}]`;
+const tag = (c: { smsPrefix: string }) => `[${c.smsPrefix}]`;
 
 export function offerText(c: CallInfo, code: string, sentAt: Date, expiresAt: Date, windowMinutes: number): string {
   const straight = expiresAt.getTime() - sentAt.getTime() === windowMinutes * 60_000;
@@ -68,20 +68,20 @@ export function releasedText(c: CallInfo): string {
   return `${tag(c)} You have been released from ${c.skill}, ${c.jobType} at ${c.venue}, ${day(c.startsAt, c.timezone)}. Contact your Steward with questions.`;
 }
 
-export function helpText(localName: string, openCodes: string[] = []): string {
+export function helpText(smsPrefix: string, openCodes: string[] = []): string {
   const open = openCodes.length ? ` Your open offers: ${openCodes.join(', ')}.` : '';
-  return `[${localName}] Reply YES <code> to accept or NO <code> to decline a work call (e.g. YES 4821).${open} Reply STOP to opt out.`;
+  return `[${smsPrefix}] Reply YES <code> to accept or NO <code> to decline a work call (e.g. YES 4821).${open} Reply STOP to opt out.`;
 }
 
-export function noOpenOffersText(localName: string): string {
-  return `[${localName}] You have no open work-call offers right now.`;
+export function noOpenOffersText(smsPrefix: string): string {
+  return `[${smsPrefix}] You have no open work-call offers right now.`;
 }
 
-export function unknownCodeText(localName: string, code: string, openCodes: string[]): string {
+export function unknownCodeText(smsPrefix: string, code: string, openCodes: string[]): string {
   const open = openCodes.length ? ` Your open offers: ${openCodes.join(', ')}.` : '';
-  return `[${localName}] We couldn't find offer ${code}.${open}`;
+  return `[${smsPrefix}] We couldn't find offer ${code}.${open}`;
 }
 
-export function exhaustedStewardText(localName: string, c: CallInfo, filled: number, qty: number): string {
-  return `[${localName}] ALERT: ${c.skill} for ${c.jobType} at ${c.venue} ${day(c.startsAt, c.timezone)} ran out of candidates (${filled}/${qty} filled).`;
+export function exhaustedStewardText(smsPrefix: string, c: CallInfo, filled: number, qty: number): string {
+  return `[${smsPrefix}] ALERT: ${c.skill} for ${c.jobType} at ${c.venue} ${day(c.startsAt, c.timezone)} ran out of candidates (${filled}/${qty} filled).`;
 }

@@ -23,6 +23,7 @@ export const ConfigInput = z.object({
   quiet_hours_end: hhmm,
   timezone: z.string().refine((tz) => IANAZone.isValidZone(tz), 'Unknown IANA timezone'),
   local_name: z.string().trim().min(1).max(40),
+  sms_prefix: z.string().trim().min(1).max(20),
   booking_buffer_minutes: z.coerce.number().int().min(0).max(720),
   steward_sms_alerts: z.preprocess((v) => v === true || v === 'on' || v === 'true', z.boolean()),
 });

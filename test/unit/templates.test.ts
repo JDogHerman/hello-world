@@ -9,7 +9,7 @@ const GSM = new Set(
 const segments = (s: string) => (s.length <= 160 ? 1 : Math.ceil(s.length / 153));
 
 const c: T.CallInfo = {
-  localName: 'IATSE 48 Akron/Canton',
+  smsPrefix: 'IA48',
   jobType: 'Load-in',
   venue: 'E.J. Thomas Performing Arts Hall',
   skill: 'Rigging',
@@ -32,10 +32,10 @@ const all: [string, string][] = [
   ['already declined', T.alreadyDeclinedText(c, '4821')],
   ['call cancelled', T.callCancelledText(c)],
   ['released', T.releasedText(c)],
-  ['help', T.helpText(c.localName, ['4821', '1234'])],
-  ['no offers', T.noOpenOffersText(c.localName)],
-  ['unknown code', T.unknownCodeText(c.localName, '9999', ['4821'])],
-  ['steward alert', T.exhaustedStewardText(c.localName, c, 1, 2)],
+  ['help', T.helpText(c.smsPrefix, ['4821', '1234'])],
+  ['no offers', T.noOpenOffersText(c.smsPrefix)],
+  ['unknown code', T.unknownCodeText(c.smsPrefix, '9999', ['4821'])],
+  ['steward alert', T.exhaustedStewardText(c.smsPrefix, c, 1, 2)],
 ];
 
 describe('SMS templates', () => {
@@ -45,6 +45,6 @@ describe('SMS templates', () => {
   });
 
   it('prefixes every text with the union name', () => {
-    for (const [, text] of all) expect(text.startsWith('[IATSE 48 Akron/Canton] ')).toBe(true);
+    for (const [, text] of all) expect(text.startsWith('[IA48] ')).toBe(true);
   });
 });

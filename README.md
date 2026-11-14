@@ -73,8 +73,8 @@ With `SMS_PROVIDER=console` (the default):
 | `DEFAULT_PHONE_REGION` | `US` | Region used to parse phone numbers entered without a country code |
 
 Operational settings live in the database and are edited on **Settings** (Admin): the reply
-window, offers out at once per open slot, quiet hours, timezone, local name (the prefix on
-every text), the minimum gap between a worker's calls, and whether Stewards get an SMS alert
+window, offers out at once per open slot, quiet hours, timezone, the union name shown in the
+app ("IATSE 48 Akron/Canton"), the short SMS prefix that starts every text ("IA48"), the minimum gap between a worker's calls, and whether Stewards get an SMS alert
 when a list runs out.
 
 ## Twilio setup

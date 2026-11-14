@@ -50,7 +50,7 @@ describe('full offer flow: offer → decline → next → timeout → next → a
     expect(h.sms.sent).toHaveLength(1);
     const offerText = h.sms.last(senior.phone)!;
     expect(offerText).toMatch(
-      /^\[IATSE 48 Akron\/Canton\] Work call: Load-in at Arena, Sat 11\/21, 8:00 AM, Position: Rigging\. Reply YES \d{4} to accept or NO \d{4} to decline\. Expires in 60 min\.$/,
+      /^\[IA48\] Work call: Load-in at Arena, Sat 11\/21, 8:00 AM, Position: Rigging\. Reply YES \d{4} to accept or NO \d{4} to decline\. Expires in 60 min\.$/,
     );
 
     // 1) Senior declines → Middle is offered.

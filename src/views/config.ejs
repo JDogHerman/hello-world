@@ -2,7 +2,8 @@
 <h1>Settings</h1>
 <form method="post" action="/config" class="card">
   <div class="row">
-    <label>Union / local name (prefix on every text) <input type="text" name="local_name" value="<%= config.local_name %>" required maxlength="40"></label>
+    <label>Union / local name (shown in the app) <input type="text" name="local_name" value="<%= config.local_name %>" required maxlength="40"></label>
+    <label>SMS prefix (starts every text, keep it short) <input type="text" name="sms_prefix" value="<%= config.sms_prefix %>" required maxlength="20"></label>
     <label>Timezone (IANA) <input type="text" name="timezone" value="<%= config.timezone %>" required placeholder="America/New_York"></label>
   </div>
   <div class="row">

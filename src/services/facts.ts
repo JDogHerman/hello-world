@@ -105,7 +105,7 @@ export async function loadCallInfo(ex: Executor, positionId: number, config: App
     ])
     .where('position.id', '=', positionId)
     .executeTakeFirstOrThrow();
-  return { ...row, localName: config.local_name, timezone: config.timezone };
+  return { ...row, smsPrefix: config.sms_prefix, timezone: config.timezone };
 }
 
 export async function lockPosition(ex: Executor, positionId: number): Promise<Position> {

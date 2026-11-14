@@ -19,6 +19,8 @@ export interface AppConfigTable {
   quiet_hours_end: string;
   timezone: string;
   local_name: string;
+  /** Tag at the start of every text, e.g. 'IA48'. */
+  sms_prefix: string;
   booking_buffer_minutes: number;
   steward_sms_alerts: boolean;
   updated_at: Generated<Date>;
