@@ -1,0 +1,25 @@
+<%- include('partials/head') %>
+<h1>Settings</h1>
+<form method="post" action="/config" class="card">
+  <div class="row">
+    <label>Union / local name (shown in the app) <input type="text" name="local_name" value="<%= config.local_name %>" required maxlength="40"></label>
+    <label>SMS prefix (starts every text, keep it short) <input type="text" name="sms_prefix" value="<%= config.sms_prefix %>" required maxlength="20"></label>
+    <label>Timezone (IANA) <input type="text" name="timezone" value="<%= config.timezone %>" required placeholder="America/New_York"></label>
+  </div>
+  <div class="row">
+    <label>Reply window (minutes) <input type="number" name="reply_window_minutes" min="1" max="1440" value="<%= config.reply_window_minutes %>" required></label>
+    <label>Offers out at once, per open slot <input type="number" name="offers_per_open_slot" min="1" max="20" value="<%= config.offers_per_open_slot %>" required></label>
+    <label>Minimum gap between a worker's calls (minutes) <input type="number" name="booking_buffer_minutes" min="0" max="720" value="<%= config.booking_buffer_minutes %>" required></label>
+  </div>
+  <div class="row">
+    <label>Quiet hours start <input type="time" name="quiet_hours_start" value="<%= config.quiet_hours_start.slice(0,5) %>" required></label>
+    <label>Quiet hours end <input type="time" name="quiet_hours_end" value="<%= config.quiet_hours_end.slice(0,5) %>" required></label>
+  </div>
+  <p class="muted small">No offers are texted during quiet hours; they are held and sent when quiet hours end, and an offer's reply countdown pauses
+    while quiet hours are in effect. Set start and end to the same time to disable. Replies to a worker's own text are still answered immediately.</p>
+  <div class="checks" style="margin-bottom:12px">
+    <label><input type="checkbox" name="steward_sms_alerts" <%= config.steward_sms_alerts ? 'checked' : '' %>> Also text Stewards (with a phone on file) when a position runs out of candidates</label>
+  </div>
+  <button class="primary">Save settings</button>
+</form>
+<%- include('partials/foot') %>

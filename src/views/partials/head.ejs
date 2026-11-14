@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title ? title + ' · ' : '' %><%= config.local_name %> Work Calls</title>
+  <link rel="stylesheet" href="/public/app.css">
+  <script src="/public/app.js" defer></script>
+</head>
+<body>
+<% if (user) { %>
+<header class="top">
+  <div class="bar">
+    <a class="brand" href="/"><%= config.local_name %> · Work Calls</a>
+    <nav class="main">
+      <% const nav = [['/', 'Dashboard'], ['/jobs', 'Jobs'], ['/workers', 'Workers'], ['/skills', 'Skills'], ['/venues', 'Venues'], ['/job-types', 'Job types'], ['/messages', 'SMS'], ['/audit', 'Audit']];
+         if (user.role === 'admin') { nav.push(['/users', 'Users'], ['/config', 'Settings']); } %>
+      <% for (const [href, label] of nav) { const on = href === '/' ? path === '/' : path.startsWith(href); %>
+        <a href="<%= href %>" class="<%= on ? 'on' : '' %>"><%= label %><% if (href === '/' && openAlerts) { %><span class="count"><%= openAlerts %></span><% } %></a>
+      <% } %>
+    </nav>
+    <form method="post" action="/logout" class="inline-form">
+      <span class="muted small hide-sm"><%= user.name %> (<%= user.role %>)</span>
+      <button class="small">Sign out</button>
+    </form>
+  </div>
+</header>
+<% } %>
+<main>
+<% if (flash.ok) { %><div class="flash ok"><%= flash.ok %></div><% } %>
+<% if (flash.err) { %><div class="flash err"><%= flash.err %></div><% } %>

@@ -1,0 +1,110 @@
+<%- include('../partials/head') %>
+<div class="pos-head">
+  <h1><%= worker.first_name %> <%= worker.last_name %>
+    <% if (!worker.active) { %><span class="badge muted">inactive</span><% } %>
+    <% if (worker.sms_opt_out) { %><span class="badge bad">opted out of SMS</span><% } %>
+  </h1>
+  <a href="/audit?entity=worker&entity_id=<%= worker.id %>" class="small">Audit history</a>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <h2>Details</h2>
+    <form method="post" action="/workers/<%= worker.id %>">
+      <%- include('_fields') %>
+    </form>
+    <% if (user.role === 'admin' && !worker.sms_opt_out) { %>
+    <details><summary>Opt this worker out of SMS</summary>
+      <form method="post" action="/workers/<%= worker.id %>/opt-out" class="inline-form" data-confirm="Opt this worker out? Only the worker can opt back in by texting START.">
+        <input type="text" name="reason" placeholder="Reason (required)" required>
+        <button class="small danger">Opt out</button>
+      </form>
+      <p class="muted small">Opting back in must come from the worker texting START (carrier rule).</p>
+    </details>
+    <% } %>
+    <% if (worker.sms_opt_out) { %><p class="muted small">Opted out <%= h.dt(worker.opt_out_at, tz) %>. The worker can text START to opt back in.</p><% } %>
+  </div>
+
+  <div>
+    <div class="card">
+      <h2>Refusals</h2>
+      <p class="muted small">This worker will never be offered these job types or venues.</p>
+      <% if (!refusals.length) { %><p class="empty">None.</p><% } %>
+      <% for (const r of refusals) { %>
+        <div class="row" style="align-items:center">
+          <div><%= r.job_type ? 'Job type: ' + r.job_type : 'Venue: ' + r.venue %> <span class="muted small"><%= r.reason %></span></div>
+          <form method="post" action="/workers/<%= worker.id %>/refusals/<%= r.id %>/delete" class="shrink"><button class="small">Remove</button></form>
+        </div>
+      <% } %>
+      <form method="post" action="/workers/<%= worker.id %>/refusals" class="row" style="margin-top:8px">
+        <label>Refuse
+          <select name="target" required>
+            <option value="">Choose…</option>
+            <optgroup label="Job types"><% for (const j of jobTypes) { %><option value="job_type:<%= j.id %>"><%= j.name %></option><% } %></optgroup>
+            <optgroup label="Venues"><% for (const v of venues) { %><option value="venue:<%= v.id %>"><%= v.name %></option><% } %></optgroup>
+          </select></label>
+                <label>Reason <input type="text" name="reason"></label>
+        <div class="shrink"><button>Add</button></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Unavailable</h2>
+      <% if (!unavailability.length) { %><p class="empty">No blocks.</p><% } %>
+      <% for (const u of unavailability) { %>
+        <div class="row" style="align-items:center">
+          <div><%= h.dt(u.starts_at, tz) %> → <%= h.dt(u.ends_at, tz) %> <span class="muted small"><%= u.note %></span></div>
+          <form method="post" action="/workers/<%= worker.id %>/unavailability/<%= u.id %>/delete" class="shrink"><button class="small">Remove</button></form>
+        </div>
+      <% } %>
+      <form method="post" action="/workers/<%= worker.id %>/unavailability" class="row" style="margin-top:8px">
+        <label>From <input type="datetime-local" name="starts_at" required></label>
+        <label>To <input type="datetime-local" name="ends_at" required></label>
+        <label>Note <input type="text" name="note"></label>
+        <div class="shrink"><button>Add</button></div>
+      </form>
+      <p class="muted small">Times are <%= tz %>. Accepted calls also block the worker automatically.</p>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Calls</h2>
+  <% if (!bookings.length) { %><p class="empty">No accepted calls.</p><% } else { %>
+  <div class="table-wrap"><table>
+    <tr><th>When</th><th>Job</th><th>Position</th><th>Status</th></tr>
+    <% for (const b of bookings) { %>
+    <tr class="<%= b.cancelled_at ? 'removed' : '' %>">
+      <td><%= h.dt(b.starts_at, tz) %></td>
+      <td><a href="/jobs/<%= b.job_id %>"><%= b.job_type %> · <%= b.venue %></a></td>
+      <td><%= b.skill %></td>
+      <td><%- b.cancelled_at ? h.badge('cancelled') + ' <span class="small muted">' + b.cancel_reason + '</span>' : h.badge('accepted') %></td>
+    </tr>
+    <% } %>
+  </table></div>
+  <% } %>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <h2>Recent offers</h2>
+    <% if (!offers.length) { %><p class="empty">None.</p><% } else { %>
+    <div class="table-wrap"><table>
+      <tr><th>Code</th><th>Call</th><th>Status</th></tr>
+      <% for (const o of offers) { %>
+      <tr><td class="mono"><%= o.code %></td><td><a href="/jobs/<%= o.job_id %>"><%= o.skill %> · <%= h.day(o.starts_at, tz) %></a></td>
+        <td><%- h.badge(o.status) %> <span class="small muted"><%= o.cancel_reason || '' %></span></td></tr>
+      <% } %>
+    </table></div>
+    <% } %>
+  </div>
+  <div class="card">
+    <h2>Text messages</h2>
+    <% if (!messages.length) { %><p class="empty">None.</p><% } %>
+    <% for (const m of messages) { %>
+      <p class="small" style="margin:0 0 8px"><span class="badge <%= m.direction === 'inbound' ? 'info' : 'muted' %>"><%= m.direction === 'inbound' ? 'in' : 'out' %></span>
+        <span class="muted"><%= h.dt(m.created_at, tz) %><%= m.status !== 'sent' && m.status !== 'received' ? ' · ' + m.status : '' %></span><br><%= m.body %></p>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/foot') %>

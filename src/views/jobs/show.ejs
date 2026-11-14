@@ -1,0 +1,50 @@
+<%- include('../partials/head') %>
+<div class="pos-head">
+  <h1><%= job.job_type %> · <%= job.venue %> <%- h.badge(job.status) %></h1>
+  <a class="small" href="/audit?entity=job&entity_id=<%= job.id %>">Audit history</a>
+</div>
+<div class="card">
+  <div class="row">
+    <div><strong><%= h.dt(job.starts_at, tz, 'cccc, LLLL d, yyyy') %></strong><br>
+      <%= h.time(job.starts_at, tz) %> – <%= h.time(job.est_end_at, tz) %> (est.)</div>
+    <div><%= job.venue %><br><span class="muted small"><%= job.address %></span></div>
+  </div>
+  <% if (job.status === 'open') { %>
+  <details><summary>Notes, add position, cancel job</summary>
+    <form method="post" action="/jobs/<%= job.id %>/notes">
+      <label>Notes <textarea name="notes"><%= job.notes %></textarea></label>
+      <button class="small">Save notes</button>
+    </form>
+    <h3>Add a position</h3>
+    <form method="post" action="/jobs/<%= job.id %>/positions" class="row">
+      <label>Skill <select name="skill_id" required><option value="">Choose…</option>
+        <% for (const s of skills) { %><option value="<%= s.id %>"><%= s.name %></option><% } %></select></label>
+      <label>How many <input type="number" name="quantity" min="1" value="1" required></label>
+      <div class="shrink"><button>Add position</button></div>
+    </form>
+    <h3>Cancel this job</h3>
+    <form method="post" action="/jobs/<%= job.id %>/cancel" class="inline-form" data-confirm="Cancel the job? Open offers are withdrawn and every accepted worker is texted.">
+      <input type="text" name="reason" placeholder="Reason (required)" required>
+      <button class="danger small">Cancel job</button>
+    </form>
+  </details>
+  <% } else if (job.notes) { %><p class="small"><%= job.notes %></p><% } %>
+</div>
+
+<div data-poll="/jobs/<%= job.id %>/board" data-interval="5000">
+  <%- include('_board') %>
+</div>
+
+<% if (devSms && workers.length) { %>
+<div class="card">
+  <h2>Simulate a worker's text reply <span class="badge warn">dev only</span></h2>
+  <form method="post" action="/dev/sms" class="row">
+    <label>From <select name="worker_id" required>
+      <% for (const w of workers) { %><option value="<%= w.id %>"><%= w.last_name %>, <%= w.first_name %></option><% } %></select></label>
+    <label>Message <input type="text" name="body" placeholder="YES 1234" required></label>
+    <div class="shrink"><button>Send</button></div>
+  </form>
+  <p class="muted small">SMS_PROVIDER=console: outbound texts print to the server console and appear under <a href="/messages">SMS</a>.</p>
+</div>
+<% } %>
+<%- include('../partials/foot') %>

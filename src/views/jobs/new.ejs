@@ -1,0 +1,52 @@
+<%- include('../partials/head') %>
+<h1>New job</h1>
+<form method="post" action="/jobs" class="card">
+  <div class="row">
+    <label>Venue
+      <select name="venue_id" required><option value="">Choose…</option>
+        <% for (const v of venues) { %><option value="<%= v.id %>"><%= v.name %></option><% } %></select></label>
+    <label>Job type
+      <select name="job_type_id" required><option value="">Choose…</option>
+        <% for (const j of jobTypes) { %><option value="<%= j.id %>"><%= j.name %></option><% } %></select></label>
+  </div>
+  <div class="row">
+    <label>Date <input type="date" name="date" required></label>
+    <label>Start time <input type="time" name="start_time" required></label>
+    <label>Estimated end <input type="time" name="end_time" required></label>
+  </div>
+  <p class="muted small" style="margin-top:-4px">Times are <%= tz %>. An end time earlier than the start means the call runs past midnight.</p>
+  <label>Notes <textarea name="notes" placeholder="Shown to Stewards only"></textarea></label>
+
+  <h3>Positions</h3>
+  <div id="pos-rows">
+    <div class="row pos-row">
+      <label>Skill <select name="skill_id" required><option value="">Choose…</option>
+        <% for (const s of skills) { %><option value="<%= s.id %>"><%= s.name %></option><% } %></select></label>
+      <label>How many <input type="number" name="quantity" min="1" value="1" required></label>
+      <div class="shrink"><button type="button" data-remove-row>Remove</button></div>
+    </div>
+  </div>
+  <template id="pos-tpl">
+    <div class="row pos-row">
+      <label>Skill <select name="skill_id"><option value="">Choose…</option>
+        <% for (const s of skills) { %><option value="<%= s.id %>"><%= s.name %></option><% } %></select></label>
+      <label>How many <input type="number" name="quantity" min="1" value="1"></label>
+      <div class="shrink"><button type="button" data-remove-row>Remove</button></div>
+    </div>
+  </template>
+  <noscript>
+    <% for (let i = 0; i < 4; i++) { %>
+    <div class="row pos-row">
+      <label>Skill <select name="skill_id"><option value="">(none)</option>
+        <% for (const s of skills) { %><option value="<%= s.id %>"><%= s.name %></option><% } %></select></label>
+      <label>How many <input type="number" name="quantity" min="1" value="1"></label>
+    </div>
+    <% } %>
+  </noscript>
+  <div class="actions" style="margin-top:10px">
+    <button type="button" data-add-row="#pos-tpl" data-target="#pos-rows">+ Add position</button>
+    <button class="primary">Create job &amp; build candidate lists</button>
+  </div>
+  <p class="muted small">Creating the job builds a draft candidate list for each position. No texts are sent until a Steward approves each list.</p>
+</form>
+<%- include('../partials/foot') %>

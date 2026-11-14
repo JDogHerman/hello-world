@@ -1,0 +1,45 @@
+<%- include('partials/head') %>
+<h1><%= label.plural %></h1>
+<% const isAdmin = user.role === 'admin'; %>
+<% if (isAdmin) { %>
+<div class="card">
+  <h2>Add <%= label.singular.toLowerCase() %></h2>
+  <form method="post" action="<%= base %>" class="row">
+    <label>Name <input type="text" name="name" required maxlength="80"></label>
+    <% if (kind === 'venue') { %><label>Address <input type="text" name="address" maxlength="200"></label><% } %>
+    <div class="shrink"><button class="primary">Add</button></div>
+  </form>
+</div>
+<% } %>
+<div class="card">
+  <% if (!items.length) { %><p class="empty">None yet.</p><% } %>
+  <div class="table-wrap"><table>
+    <tr><th>Name</th><% if (kind === 'venue') { %><th>Address</th><% } %><th>Status</th><% if (isAdmin) { %><th></th><% } %></tr>
+    <% for (const it of items) { %>
+    <tr class="<%= it.active ? '' : 'removed' %>">
+      <% if (isAdmin) { %>
+        <td colspan="<%= kind === 'venue' ? 2 : 1 %>">
+          <form method="post" action="<%= base %>/<%= it.id %>" class="inline-form">
+            <input type="text" name="name" value="<%= it.name %>" required>
+            <% if (kind === 'venue') { %><input type="text" name="address" value="<%= it.address %>" placeholder="Address"><% } %>
+            <button class="small">Save</button>
+          </form>
+        </td>
+      <% } else { %>
+        <td><%= it.name %></td><% if (kind === 'venue') { %><td><%= it.address %></td><% } %>
+      <% } %>
+      <td><%- h.badge(it.active ? 'active' : 'cancelled').replace('cancelled', 'retired') %></td>
+      <% if (isAdmin) { %>
+      <td>
+        <form method="post" action="<%= base %>/<%= it.id %>/toggle" class="inline-form">
+          <input type="hidden" name="active" value="<%= it.active ? 'false' : 'true' %>">
+          <button class="small"><%= it.active ? 'Retire' : 'Re-activate' %></button>
+        </form>
+      </td>
+      <% } %>
+    </tr>
+    <% } %>
+  </table></div>
+  <p class="muted small">Retired items stay attached to past records but can't be chosen for new ones.</p>
+</div>
+<%- include('partials/foot') %>

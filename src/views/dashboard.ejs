@@ -1,0 +1,51 @@
+<%- include('partials/head') %>
+<h1>Dashboard</h1>
+
+<% if (alerts.length) { %>
+<div class="card alert">
+  <h2>Needs attention</h2>
+  <% for (const a of alerts) { %>
+    <div class="row" style="align-items:center;margin-bottom:8px">
+      <div><strong><%= a.message %></strong><br><span class="muted small"><%= h.dt(a.created_at, tz) %> · <a href="/jobs/<%= a.job_id %>">Open job</a></span></div>
+      <form method="post" action="/alerts/<%= a.id %>/ack" class="shrink"><button class="small">Acknowledge</button></form>
+    </div>
+  <% } %>
+</div>
+<% } %>
+
+<div class="grid2">
+  <div class="card">
+    <h2>Awaiting Steward approval</h2>
+    <% if (!pending.length) { %><p class="empty">Nothing waiting.</p><% } else { %>
+    <div class="table-wrap"><table>
+      <tr><th>When</th><th>Job</th><th>Position</th><th></th></tr>
+      <% for (const p of pending) { %>
+      <tr>
+        <td><%= h.dt(p.starts_at, tz, 'ccc M/d h:mm a') %></td>
+        <td><%= p.job_type %> · <%= p.venue %></td>
+        <td><%= p.skill %> × <%= p.quantity %> <%- h.badge(p.status) %></td>
+        <td><a class="btn small" href="/lists/<%= p.id %>">Review</a></td>
+      </tr>
+      <% } %>
+    </table></div>
+    <% } %>
+  </div>
+  <div class="card">
+    <h2>Upcoming calls</h2>
+    <p class="muted small"><%= inFlight %> offer(s) currently out.</p>
+    <% if (!upcoming.length) { %><p class="empty">No upcoming jobs. <a href="/jobs/new">Create one</a>.</p><% } else { %>
+    <div class="table-wrap"><table>
+      <tr><th>When</th><th>Job</th><th>Filled</th></tr>
+      <% for (const j of upcoming) { %>
+      <tr>
+        <td><%= h.dt(j.starts_at, tz, 'ccc M/d h:mm a') %></td>
+        <td><a href="/jobs/<%= j.id %>"><%= j.job_type %> · <%= j.venue %></a></td>
+        <td><%= j.filled %>/<%= j.needed %>
+          <div class="progress"><span style="width:<%= j.needed ? Math.round(100 * j.filled / j.needed) : 0 %>%"></span></div></td>
+      </tr>
+      <% } %>
+    </table></div>
+    <% } %>
+  </div>
+</div>
+<%- include('partials/foot') %>

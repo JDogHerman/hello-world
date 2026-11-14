@@ -1,0 +1,23 @@
+<% const ro = user.role !== 'admin'; const w = worker || {}; %>
+<fieldset <%= ro ? 'disabled' : '' %> style="border:0;padding:0;margin:0">
+  <div class="row">
+    <label>First name <input type="text" name="first_name" value="<%= w.first_name || '' %>" required></label>
+    <label>Last name <input type="text" name="last_name" value="<%= w.last_name || '' %>" required></label>
+  </div>
+  <div class="row">
+    <label>Mobile phone <input type="tel" name="phone" value="<%= w.phone ? h.phone(w.phone) : '' %>" required placeholder="(555) 555-0123"></label>
+    <label>Tranche (1 = highest) <input type="number" name="tranche" min="1" value="<%= w.tranche || 1 %>" required></label>
+    <label>Start (seniority) date <input type="date" name="start_date" value="<%= w.start_date || '' %>" required></label>
+  </div>
+  <label>Skills</label>
+  <div class="checks" style="margin-bottom:10px">
+    <% for (const s of skills) { if (!s.active && !workerSkills.includes(s.id)) continue; %>
+      <label><input type="checkbox" name="skill_ids" value="<%= s.id %>" <%= workerSkills.includes(s.id) ? 'checked' : '' %>> <%= s.name %></label>
+    <% } %>
+  </div>
+  <div class="checks" style="margin-bottom:10px">
+    <label><input type="checkbox" name="active" <%= worker === null || w.active ? 'checked' : '' %>> Active (eligible for calls)</label>
+  </div>
+  <label>Notes <textarea name="notes"><%= w.notes || '' %></textarea></label>
+  <% if (!ro) { %><button class="primary"><%= worker ? 'Save changes' : 'Create worker' %></button><% } %>
+</fieldset>

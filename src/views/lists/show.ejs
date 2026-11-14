@@ -1,0 +1,113 @@
+<%- include('../partials/head') %>
+<% const editable = !['cancelled','filled'].includes(list.status) && list.job_status === 'open';
+   const preApproval = ['draft','pending_approval'].includes(list.status); %>
+<p class="small"><a href="/jobs/<%= list.job_id %>">← <%= list.job_type %> · <%= list.venue %></a></p>
+<div class="pos-head">
+  <h1>Candidates: <%= list.skill %> × <%= list.quantity %> <%- h.badge(list.status) %></h1>
+  <a class="small" href="/audit?entity=candidate_list&entity_id=<%= list.id %>">Change log</a>
+</div>
+
+<div class="card">
+  <div class="row">
+    <div><strong><%= h.dt(list.starts_at, tz, 'ccc M/d/yy h:mm a') %></strong> – <%= h.time(list.est_end_at, tz) %><br>
+      <span class="muted small">List built <%= h.dt(list.generated_at, tz) %></span></div>
+    <div><%= list.filled_count %>/<%= list.quantity %> filled · <%= active.length %> on list · <%= exclusions.length %> excluded</div>
+  </div>
+  <% if (preApproval) { %>
+    <p><strong>Nothing has been texted.</strong> Review the order below, adjust if needed, then approve. On approval the top
+      <%= list.quantity * config.offers_per_open_slot %> candidate(s) are texted<%= config.offers_per_open_slot > 1 ? '' : ' (one per open slot)' %>.</p>
+    <div class="actions">
+      <% if (canApprove) { %>
+      <form method="post" action="/lists/<%= list.id %>/approve" class="inline-form" data-confirm="Approve this list and start texting offers?">
+        <input type="text" name="note" placeholder="Approval note (optional)">
+        <button class="primary">Approve &amp; start offers</button>
+      </form>
+      <% } else { %>
+        <% if (list.status === 'draft') { %>
+        <form method="post" action="/lists/<%= list.id %>/submit"><button class="primary">Submit for Steward approval</button></form>
+        <% } else { %><span class="muted">Waiting for a Steward to approve.</span><% } %>
+      <% } %>
+      <form method="post" action="/lists/<%= list.id %>/regenerate" data-confirm="Rebuild from the current roster? Manual edits will be lost.">
+        <button>Rebuild from roster</button></form>
+    </div>
+  <% } else if (list.approved_at) { %>
+    <p class="muted small">Approved by <%= list.approver || 'unknown' %> on <%= h.dt(list.approved_at, tz) %>.</p>
+  <% } %>
+</div>
+
+<div class="card">
+  <h2>Ranked list</h2>
+  <p class="muted small">Order: tranche, then seniority date, then last name. Every change needs a reason and is logged.</p>
+  <% if (!active.length) { %><p class="empty">No eligible candidates.</p><% } else { %>
+  <div class="table-wrap"><table>
+    <tr><th>#</th><th>Worker</th><th>Tranche</th><th class="hide-sm">Start date</th><th>Offer</th><% if (editable) { %><th>Adjust</th><% } %></tr>
+    <% for (const e of active) { const o = offerBy.get(e.worker_id); %>
+    <tr>
+      <td><%= e.rank %></td>
+      <td><a href="/workers/<%= e.worker_id %>"><%= e.last_name %>, <%= e.first_name %></a>
+        <% if (e.source === 'manual') { %><span class="badge info">added</span><% } %>
+        <% if (e.skipped_reasons && e.skipped_reasons.length && !o) { %><br><span class="small" style="color:var(--warn)">Skipped: <%= h.reasons(e.skipped_reasons) %></span><% } %></td>
+      <td><%= e.tranche %></td>
+      <td class="hide-sm"><%= e.start_date %></td>
+      <td><% if (o) { %><%- h.badge(o.status) %><% if (o.status === 'sent') { %> <span class="countdown small" data-expires="<%= h.iso(o.expires_at) %>"></span><% } %><% } else { %><span class="muted small">—</span><% } %></td>
+      <% if (editable) { %>
+      <td>
+        <% if (!o || !['accepted'].includes(o.status)) { %>
+        <details><summary class="small">Move / remove</summary>
+          <form method="post" action="/entries/<%= e.id %>/move" class="inline-form" style="margin-bottom:6px">
+            <input type="number" name="rank" min="1" max="<%= active.length %>" value="<%= e.rank %>" aria-label="New position">
+            <input type="text" name="reason" placeholder="Reason" required>
+            <button class="small">Move</button>
+          </form>
+          <form method="post" action="/entries/<%= e.id %>/remove" class="inline-form" <% if (o && o.status === 'sent') { %>data-confirm="This worker has an open offer. Removing withdraws it and texts the next candidate."<% } %>>
+            <input type="text" name="reason" placeholder="Reason" required>
+            <button class="small danger">Remove</button>
+          </form>
+        </details>
+        <% } %>
+      </td>
+      <% } %>
+    </tr>
+    <% } %>
+  </table></div>
+  <% } %>
+
+  <% if (editable) { %>
+  <h3>Add a worker</h3>
+  <form method="post" action="/lists/<%= list.id %>/add" class="row">
+    <label>Worker <select name="worker_id" required><option value="">Choose…</option>
+      <% for (const w of addable) { %><option value="<%= w.id %>"><%= w.last_name %>, <%= w.first_name %> (T<%= w.tranche %>)</option><% } %></select></label>
+    <label>At position <input type="number" name="rank" min="1" placeholder="end"></label>
+    <label>Reason <input type="text" name="reason" required></label>
+    <div class="shrink checks"><label><input type="checkbox" name="override"> Override skill/refusal</label></div>
+    <div class="shrink"><button>Add</button></div>
+  </form>
+  <p class="muted small">Hard exclusions (inactive, opted out, unavailable, double-booked, already on this job) can't be overridden.</p>
+  <% } %>
+</div>
+
+<% if (removed.length) { %>
+<div class="card">
+  <h2>Removed</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Worker</th><th>Reason</th><th>When</th></tr>
+    <% for (const e of removed) { %>
+    <tr class="removed"><td><%= e.last_name %>, <%= e.first_name %></td><td><%= e.removed_reason %></td><td class="small"><%= h.dt(e.removed_at, tz) %></td></tr>
+    <% } %>
+  </table></div>
+</div>
+<% } %>
+
+<div class="card">
+  <h2>Excluded workers</h2>
+  <p class="muted small">Why each worker is not on this list (as of when the list was built).</p>
+  <% if (!exclusions.length) { %><p class="empty">Nobody excluded.</p><% } else { %>
+  <div class="table-wrap"><table>
+    <tr><th>Worker</th><th>Tranche</th><th>Reasons</th></tr>
+    <% for (const x of exclusions) { %>
+    <tr><td><a href="/workers/<%= x.worker_id %>"><%= x.last_name %>, <%= x.first_name %></a></td><td><%= x.tranche %></td><td><%= h.reasons(x.reasons) %></td></tr>
+    <% } %>
+  </table></div>
+  <% } %>
+</div>
+<%- include('../partials/foot') %>
